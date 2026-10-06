@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: locklens-postgres
+    environment:
+      POSTGRES_DB: locklens
+      POSTGRES_USER: locklens
+      POSTGRES_PASSWORD: locklens
+    ports:
+      - "5432:5432"
+    volumes:
+      - locklens-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  locklens-postgres-data:
