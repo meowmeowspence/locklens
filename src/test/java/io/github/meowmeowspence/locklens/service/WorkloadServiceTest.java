@@ -1,36 +1,47 @@
 package io.github.meowmeowspence.locklens.service;
 
 import io.github.meowmeowspence.locklens.domain.Workload;
+import io.github.meowmeowspence.locklens.repository.WorkloadRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
+@Transactional
 class WorkloadServiceTest {
 
+    @Autowired
     private WorkloadService workloadService;
+
+    @Autowired
+    private WorkloadRepository workloadRepository;
 
     @BeforeEach
     void setUp() {
-        workloadService = new WorkloadService();
+        workloadRepository.deleteAll();
     }
 
     @Test
-    void createAssignsIdAndStoresWorkload() {
+    void createPersistsWorkload() {
         Workload workload = workloadService.create(
                 "Deadlock Test",
                 "Test description"
         );
 
-        assertEquals(1L, workload.getId());
+        assertNotNull(workload.getId());
         assertEquals("Deadlock Test", workload.getName());
         assertEquals("Test description", workload.getDescription());
         assertNotNull(workload.getCreatedAt());
 
-        Optional<Workload> stored = workloadService.findById(1L);
+        Optional<Workload> stored =
+                workloadRepository.findById(workload.getId());
 
         assertTrue(stored.isPresent());
         assertEquals("Deadlock Test", stored.get().getName());
@@ -38,19 +49,27 @@ class WorkloadServiceTest {
 
     @Test
     void findAllReturnsWorkloadsInIdOrder() {
-        workloadService.create("First", "First workload");
-        workloadService.create("Second", "Second workload");
+        Workload first = workloadService.create(
+                "First",
+                "First workload"
+        );
+
+        Workload second = workloadService.create(
+                "Second",
+                "Second workload"
+        );
 
         List<Workload> workloads = workloadService.findAll();
 
         assertEquals(2, workloads.size());
-        assertEquals(1L, workloads.get(0).getId());
-        assertEquals(2L, workloads.get(1).getId());
+        assertEquals(first.getId(), workloads.get(0).getId());
+        assertEquals(second.getId(), workloads.get(1).getId());
     }
 
     @Test
     void findByIdReturnsEmptyForUnknownWorkload() {
-        Optional<Workload> result = workloadService.findById(999L);
+        Optional<Workload> result =
+                workloadService.findById(Long.MAX_VALUE);
 
         assertTrue(result.isEmpty());
     }
