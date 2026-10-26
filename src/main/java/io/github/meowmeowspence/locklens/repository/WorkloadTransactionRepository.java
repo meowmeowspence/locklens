@@ -10,4 +10,6 @@ public interface WorkloadTransactionRepository
 
     List<WorkloadTransaction>
     findByWorkloadIdOrderByExecutionOrderAsc(Long workloadId);
+
+    boolean existsByIdAndWorkloadId(Long id, Long workloadId);
 }
